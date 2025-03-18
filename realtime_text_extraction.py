@@ -3,7 +3,9 @@ import easyocr
 import time
 
 def realtime_ocr():
-    """Performs real-time text detection and extraction using webcam."""
+    """Performs real-time text detection and extraction using webcam,
+    and prints the bounding box coordinates.
+    """
     try:
         # Initialize the OCR reader
         reader = easyocr.Reader(['en'])  # You can specify languages here
@@ -40,13 +42,19 @@ def realtime_ocr():
                 tl = (int(tl[0]), int(tl[1]))
                 br = (int(br[0]), int(br[1]))
 
+                # Print the bounding box coordinates
+                print(f"Text: '{text}'")
+                print(f"  Top-Left: {tl}")
+                print(f"  Bottom-Right: {br}")
+                print(f"  Confidence: {prob:.2f}")
+                print("-" * 20)  # Separator for clarity
+
                 # Draw the bounding box
                 cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
 
                 # Put the detected text above the bounding box
                 cv2.putText(frame, text, (tl[0], tl[1] - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-                print(f"Detected: '{text}' with confidence {prob:.2f}")
 
             # Display the frame with detections
             cv2.imshow('Real-time OCR', frame)
