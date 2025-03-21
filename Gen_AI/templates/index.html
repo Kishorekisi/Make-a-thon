@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Dashboard</title>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #e0e0e0;
+        }
+
+        p {
+            text-align: center;
+            font-size: 16px;
+        }
+
+        #total-votes {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Election Results</h1>
+    <p><strong>Total Votes:</strong> <span id="total-votes">0</span></p>
+
+    <h2>Candidate Vote Counts</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Candidate</th>
+                <th>Votes</th>
+                <th>Percentage</th>
+            </tr>
+        </thead>
+        <tbody id="candidates-table">
+            <tr><td colspan="3">Waiting for data...</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        const socket = io();
+
+        socket.on('votes_updated', function(data) {
+            console.log("Received WebSocket update:", data);
+            fetchAndUpdateData(); // Fetch latest data when update received
+        });
+
+        async function fetchAndUpdateData() {
+            try {
+                const response = await fetch('/api/votes');
+                const data = await response.json();
+
+                document.getElementById("total-votes").textContent = data.totalVotes;
+                
+                let tableContent = "";
+                data.candidates.forEach(candidate => {
+                    tableContent += `<tr>
+                        <td>${candidate.name}</td>
+                        <td>${candidate.votes}</td>
+                        <td>${candidate.percent}%</td>
+                    </tr>`;
+                });
+
+                document.getElementById("candidates-table").innerHTML = tableContent || "<tr><td colspan='3'>No data available</td></tr>";
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        // Fetch initial data when the page loads
+        document.addEventListener('DOMContentLoaded', fetchAndUpdateData);
+    </script>
+</body>
+</html>
