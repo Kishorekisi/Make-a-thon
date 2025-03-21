@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Election Results Dashboard</title>
+    <style>
+      :root {
+        --primary: #4361ee;
+        --secondary: #3f37c9;
+        --success: #4bb543;
+        --info: #4895ef;
+        --warning: #f9c74f;
+        --danger: #ef476f;
+        --light: #f8f9fa;
+        --dark: #212529;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f7fd;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        background-color: var(--primary);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+      }
+
+      .header p {
+        margin: 10px 0 0;
+        opacity: 0.8;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+      }
+
+      .card-header {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .card-header h2 {
+        margin: 0;
+        font-size: 18px;
+        color: var(--dark);
+      }
+
+      .card-header .badge {
+        background-color: var(--info);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+      }
+
+      .stat-card {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--primary);
+        margin: 0;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: #666;
+        margin: 5px 0 0;
+      }
+
+      .results {
+        margin-top: 20px;
+      }
+
+      .candidate-bar {
+        margin-bottom: 15px;
+      }
+
+      .candidate-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+      }
+
+      .candidate-name {
+        font-weight: 500;
+      }
+
+      .candidate-votes {
+        font-weight: bold;
+      }
+
+      .progress-bar {
+        height: 10px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        overflow: hidden;
+      }
+
+      .progress {
+        height: 100%;
+        border-radius: 5px;
+      }
+
+      .winner {
+        background-color: var(--success);
+      }
+
+      .runner-up {
+        background-color: var(--info);
+      }
+
+      .other {
+        background-color: var(--secondary);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+
+      table th,
+      table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+
+      table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+      }
+
+      table tr:hover {
+        background-color: #f5f5f5;
+      }
+
+      .badge-confidence {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: normal;
+      }
+
+      .high {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .medium {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+
+      .low {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+
+      .chart-container {
+        height: 300px;
+        margin-top: 15px;
+      }
+
+      .winner-badge {
+        background-color: var(--success);
+        color: white;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        margin-left: 10px;
+      }
+
+      .refresh-time {
+        font-size: 12px;
+        color: #777;
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--secondary);
+      }
+
+      .btn-secondary {
+        background-color: #e9ecef;
+        color: #333;
+      }
+
+      .btn-secondary:hover {
+        background-color: #ced4da;
+      }
+
+      @media (max-width: 768px) {
+        .dashboard-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Election Results Dashboard</h1>
+        <p>Live vote counting and election statistics</p>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header">
+            <h2>Election Summary</h2>
+            <span class="badge">Live</span>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <p class="stat-value">5</p>
+              <p class="stat-label">Total Votes</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-value">4</p>
+              <p class="stat-label">Candidates</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-value">3</p>
+              <p class="stat-label">Winner Votes</p>
+            </div>
+          </div>
+          <div class="results">
+            <h3>Current Results</h3>
+
+            <div class="candidate-bar">
+              <div class="candidate-info">
+                <span class="candidate-name"
+                  >Chandran.S <span class="winner-badge">WINNER</span></span
+                >
+                <span class="candidate-votes">3 votes (60%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress winner" style="width: 60%"></div>
+              </div>
+            </div>
+
+            <div class="candidate-bar">
+              <div class="candidate-info">
+                <span class="candidate-name">Venkat.K</span>
+                <span class="candidate-votes">2 votes (40%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress runner-up" style="width: 40%"></div>
+              </div>
+            </div>
+
+            <div class="candidate-bar">
+              <div class="candidate-info">
+                <span class="candidate-name">Gopal.G.K</span>
+                <span class="candidate-votes">0 votes (0%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress other" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div class="candidate-bar">
+              <div class="candidate-info">
+                <span class="candidate-name">Sumathi.R</span>
+                <span class="candidate-votes">0 votes (0%)</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress other" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Vote Detection Log</h2>
+            <span class="badge">Recent Activity</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Candidate</th>
+                <th>Confidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>14:32:45</td>
+                <td>Chandran.S</td>
+                <td><span class="badge-confidence high">0.89</span></td>
+              </tr>
+              <tr>
+                <td>14:28:12</td>
+                <td>Venkat.K</td>
+                <td><span class="badge-confidence high">0.92</span></td>
+              </tr>
+              <tr>
+                <td>14:23:56</td>
+                <td>Chandran.S</td>
+                <td><span class="badge-confidence medium">0.76</span></td>
+              </tr>
+              <tr>
+                <td>14:19:20</td>
+                <td>Venkat.K</td>
+                <td><span class="badge-confidence high">0.88</span></td>
+              </tr>
+              <tr>
+                <td>14:15:08</td>
+                <td>Chandran.S</td>
+                <td><span class="badge-confidence high">0.85</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2>Vote Distribution</h2>
+        </div>
+        <div id="chart" class="chart-container">
+          <svg width="100%" height="100%" viewBox="0 0 800 300">
+            <!-- Background grid -->
+            <line
+              x1="100"
+              y1="50"
+              x2="100"
+              y2="250"
+              stroke="#e9ecef"
+              stroke-width="1"
+            />
+            <line
+              x1="100"
+              y1="250"
+              x2="750"
+              y2="250"
+              stroke="#333"
+              stroke-width="2"
+            />
+            <line
+              x1="100"
+              y1="50"
+              x2="750"
+              y2="50"
+              stroke="#e9ecef"
+              stroke-width="1"
+            />
+            <line
+              x1="100"
+              y1="150"
+              x2="750"
+              y2="150"
+              stroke="#e9ecef"
+              stroke-width="1"
+            />
+
+            <!-- Y-axis labels -->
+            <text x="90" y="250" text-anchor="end" font-size="12">0</text>
+            <text x="90" y="150" text-anchor="end" font-size="12">50%</text>
+            <text x="90" y="50" text-anchor="end" font-size="12">100%</text>
+
+            <!-- Bars -->
+            <rect
+              x="150"
+              y="130"
+              width="80"
+              height="120"
+              fill="#4361ee"
+              opacity="0.8"
+            />
+            <rect
+              x="300"
+              y="170"
+              width="80"
+              height="80"
+              fill="#4361ee"
+              opacity="0.8"
+            />
+            <rect
+              x="450"
+              y="250"
+              width="80"
+              height="0"
+              fill="#4361ee"
+              opacity="0.8"
+            />
+            <rect
+              x="600"
+              y="250"
+              width="80"
+              height="0"
+              fill="#4361ee"
+              opacity="0.8"
+            />
+
+            <!-- X-axis labels -->
+            <text x="190" y="270" text-anchor="middle" font-size="12">
+              Chandran.S
+            </text>
+            <text x="340" y="270" text-anchor="middle" font-size="12">
+              Venkat.K
+            </text>
+            <text x="490" y="270" text-anchor="middle" font-size="12">
+              Gopal.G.K
+            </text>
+            <text x="640" y="270" text-anchor="middle" font-size="12">
+              Sumathi.R
+            </text>
+
+            <!-- Values -->
+            <text
+              x="190"
+              y="125"
+              text-anchor="middle"
+              font-size="12"
+              fill="white"
+              font-weight="bold"
+            >
+              3
+            </text>
+            <text
+              x="340"
+              y="165"
+              text-anchor="middle"
+              font-size="12"
+              fill="white"
+              font-weight="bold"
+            >
+              2
+            </text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary">Export Results</button>
+        <button class="btn btn-primary">Refresh Data</button>
+      </div>
+
+      <p class="refresh-time">Last updated: March 20, 2025 15:42:18</p>
+    </div>
+  </body>
+</html>
